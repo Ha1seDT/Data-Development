@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Покупка билета</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
+</head>
+<body>
+    <h1>Покупка билета</h1>
+    <form method="POST">
+        <label for="flight_id">Выберите рейс:</label>
+        <select id="flight_id" name="flight_id" required>
+            {% for flight in flights %}
+            <option value="{{ flight[0] }}">{{ flight[1] }} (Вылет: {{ flight[2] }}, Прилет: {{ flight[3] }})</option>
+            {% endfor %}
+        </select>
+        <br>
+        <label for="seat_number">Номер места:</label>
+        <input type="text" id="seat_number" name="seat_number" required>
+        <br>
+        <label for="ticket_class">Класс обслуживания:</label>
+        <select id="ticket_class" name="ticket_class" required>
+            <option value="Economy">Эконом</option>
+            <option value="Business">Бизнес</option>
+            <option value="First">Первый</option>
+        </select>
+        <br>
+        <button type="submit">Купить билет</button>
+    </form>
+    <a href="{{ url_for('index') }}">На главную</a>
+</body>
+</html>
