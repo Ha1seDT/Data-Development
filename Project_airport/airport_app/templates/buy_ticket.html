@@ -9,6 +9,7 @@
 <body>
     <h1>Покупка билета</h1>
     <form method="POST">
+        <input type="hidden" name="passenger_id" value="{{ passenger_id }}">
         <label for="flight_id">Выберите рейс:</label>
         <select id="flight_id" name="flight_id" required>
             {% for flight in flights %}

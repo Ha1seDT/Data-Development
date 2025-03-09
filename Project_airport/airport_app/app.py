@@ -48,22 +48,37 @@ def register():
         if conn:
             cur = conn.cursor()
             try:
+                # Проверяем, есть ли уже пассажир с таким номером паспорта
+                cur.execute("SELECT passenger_id FROM Passengers WHERE passport_number = %s", (passport_number,))
+                existing_passenger = cur.fetchone()
+                if existing_passenger:
+                    conn.close()
+                    return "Пассажир с таким номером паспорта уже зарегистрирован."
+
+                # Вставляем данные и возвращаем passenger_id
                 cur.execute("""
                     INSERT INTO Passengers (first_name, last_name, passport_number)
                     VALUES (%s, %s, %s)
                     RETURNING passenger_id
                 """, (first_name, last_name, passport_number))
-                passenger_id = cur.fetchone()[0]
-                conn.commit()
-                conn.close()
-                return redirect(url_for('buy_ticket', passenger_id=passenger_id))
+
+                # Извлекаем passenger_id
+                result = cur.fetchone()
+                if result:
+                    passenger_id = result[0]
+                    conn.commit()
+                    conn.close()
+                    # Перенаправляем на страницу покупки билета с passenger_id
+                    return redirect(url_for('buy_ticket', passenger_id=passenger_id))
+                else:
+                    conn.close()
+                    return "Ошибка: не удалось получить passenger_id."
             except Exception as e:
                 conn.close()
                 return f"Ошибка при регистрации пассажира: {e}"
         else:
             return "Ошибка подключения к базе данных."
     return render_template('register.html')
-
 # Покупка билета
 @app.route('/buy_ticket/<int:passenger_id>', methods=['GET', 'POST'])
 def buy_ticket(passenger_id):
@@ -98,7 +113,6 @@ def buy_ticket(passenger_id):
         return render_template('buy_ticket.html', flights=flights, passenger_id=passenger_id)
     else:
         return "Ошибка подключения к базе данных."
-
 # Запуск приложения
 if __name__ == '__main__':
     app.run(debug=True)
